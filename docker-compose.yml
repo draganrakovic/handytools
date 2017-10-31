@@ -1,0 +1,50 @@
+version: '2'
+services:
+# Web Server - nginx
+  web:
+    build:
+      context: ./
+      dockerfile: deploy/web.dockerfile
+    volumes:
+      - ./:/var/www/handytools
+    ports:
+      - "80:80"
+    links:
+      - app
+
+# The Application
+  app:
+    build:
+      context: ./
+      dockerfile: deploy/app.dockerfile
+    working_dir: /var/www/handytools
+    volumes:
+        - ./:/var/www/handytools
+
+# Composer install
+  composer:
+    restart: 'no'
+    image: composer/composer:php7
+    command: install
+    volumes:
+      - .:/var/www/handytools
+
+# Node for vue.js
+  node:
+   build:
+     context: ./
+     dockerfile: deploy/node.dockerfile
+   working_dir: /var/www/handytools
+   volumes:
+       - ./:/var/www/handytools
+
+# The database
+  mysql:
+      image: mysql:latest
+      ports:
+          - 33061:3306
+      environment:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: handytools
+          MYSQL_USER: root
+          MYSQL_PASSWORD: root
